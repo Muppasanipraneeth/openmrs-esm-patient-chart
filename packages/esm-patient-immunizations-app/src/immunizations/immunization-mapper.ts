@@ -34,7 +34,7 @@ const mapToImmunizationDose = (immunizationBundleEntry: FHIRImmunizationBundleEn
 };
 
 const findCodeWithoutSystem = function (immunizationResource: FHIRImmunizationResource) {
-  //Code without system represents internal code using uuid
+  // Code without system represents internal code using uuid
   return find(immunizationResource?.vaccineCode?.coding, function (code: Code) {
     return isUndefined(code.system);
   });
@@ -86,7 +86,7 @@ export const mapToFHIRImmunizationResource = (
       ],
     },
     patient: toReferenceOfType('Patient', immunizationFormData.patientUuid),
-    encounter: toReferenceOfType('Encounter', visitUuid), //Reference of visit instead of encounter
+    encounter: toReferenceOfType('Encounter', visitUuid),
     occurrenceDateTime: immunizationFormData.vaccinationDate,
     expirationDate: immunizationFormData.expirationDate,
     location: toReferenceOfType('Location', locationUuid),

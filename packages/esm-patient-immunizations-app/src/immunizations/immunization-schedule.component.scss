@@ -1,0 +1,210 @@
+.widgetCard {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  margin-bottom: 20px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.title {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #f44336;
+  font-weight: bold;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.toggleButtons {
+  display: flex;
+}
+
+.displayOptions {
+  display: flex;
+  gap: 1rem;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.scheduleContainer {
+  overflow-x: auto;
+  max-width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.scheduleTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+
+  th,
+  td {
+    border: 1px solid #ddd;
+    text-align: center;
+    padding: 8px;
+  }
+}
+
+.cornerCell {
+  background-color: #f44336;
+  color: white;
+  position: relative;
+}
+
+.ageVaccineLabels {
+  position: relative;
+  height: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ageLabel {
+  position: absolute;
+  top: -5px;
+  right: 5px;
+  font-weight: bold;
+}
+
+.vaccineLabel {
+  position: absolute;
+  bottom: -5px;
+  left: 5px;
+  font-weight: bold;
+}
+
+.ageCell {
+  background-color: #f8c8c3;
+  font-weight: bold;
+  min-width: 55px;
+}
+
+.vaccineCell {
+  background-color: #ffe0b2;
+  font-weight: bold;
+  text-align: left;
+  padding-left: 15px;
+  min-width: 150px;
+}
+
+// Cell styles based on vaccination status
+.recommended {
+  background-color: #ffffaa;
+  font-size: 0.75rem;
+  height: 40px;
+  &:empty {
+    background-color: #ffffaa;
+  }
+}
+
+.catchUp {
+  background-color: #d9ead3;
+  font-size: 0.75rem;
+  height: 40px;
+  &:empty {
+    background-color: #d9ead3;
+  }
+}
+
+.highRisk {
+  background-color: #9fc5e8;
+  font-size: 0.75rem;
+  height: 40px;
+  &:empty {
+    background-color: #9fc5e8;
+  }
+}
+
+.notRecommended {
+  background-color: #ffffff;
+  font-size: 0.75rem;
+  height: 40px;
+}
+
+.completed {
+  background-color: #d0e0e3;
+  font-size: 0.75rem;
+  height: 40px;
+  position: relative;
+
+  &::after {
+    content: '✓';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+    color: green;
+  }
+}
+
+// Legend styles
+.legend {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.legendItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  margin-right: 15px;
+  margin-bottom: 5px;
+}
+
+.legendColor {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+
+  &.recommended {
+    background-color: #ffffaa;
+  }
+
+  &.catchUp {
+    background-color: #d9ead3;
+  }
+
+  &.highRisk {
+    background-color: #9fc5e8;
+  }
+
+  &.notRecommended {
+    background-color: #ffffff;
+  }
+}
+
+.disclaimers {
+  margin: 10px 0 0 0;
+  padding-left: 20px;
+
+  li {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    color: #666;
+  }
+}

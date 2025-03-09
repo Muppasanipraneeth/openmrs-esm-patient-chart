@@ -239,6 +239,8 @@ const ImmunizationsForm: React.FC<DefaultPatientWorkspaceProps> = ({
                   )}
                 />
               </ResponsiveWrapper>
+            </div>
+            <div>
               <ResponsiveWrapper>
                 <Controller
                   name="vaccinationTime"
