@@ -30,6 +30,15 @@
 
     },
     {
+      "name": "immunization-schedule-title-widget",
+      "component": "immunizationScheduleDashTile",
+      "slot": "patient-chart-immunizations-dashboard-slot",
+      "meta": {
+        "fullWidth": true
+      }
+    },
+    
+    {
       "name": "immunization-summary-dashboard",
       "component": "immunizationsDashboardLink",
       "slot": "patient-chart-dashboard-slot",
