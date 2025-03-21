@@ -4,7 +4,6 @@ import styles from './immunization-schedule.scss';
 import { Grid, Column, Tile, SkeletonText } from '@carbon/react';
 import { ErrorState } from '@openmrs/esm-framework';
 import ExpandableTileComponent from './expandable-tile-component';
-import { EmptyState } from '@openmrs/esm-patient-common-lib';
 
 interface ImmunizationScheduleTileProps {
   patientUuid: string;
@@ -33,7 +32,7 @@ const ImmunizationScheduleTile: React.FC<ImmunizationScheduleTileProps> = ({ pat
       <Grid fullWidth narrow className={styles.immunizationGrid}>
         <Column sm={4} md={8} lg={16} className={styles.container}>
           <div className={styles.vaccineRows}>
-            {existingImmunizations?.length !== 0 ? (
+            {existingImmunizations?.length === 0 ? (
               existingImmunizations.map((immunization, index) => {
                 const sortedDoses = [...immunization.existingDoses].sort(
                   (a, b) => new Date(a.occurrenceDateTime).getTime() - new Date(b.occurrenceDateTime).getTime(),
@@ -64,7 +63,7 @@ const ImmunizationScheduleTile: React.FC<ImmunizationScheduleTileProps> = ({ pat
                 );
               })
             ) : (
-              <EmptyState headerTitle="Immunization History" displayText="immunization history" />
+              <></>
             )}
           </div>
         </Column>

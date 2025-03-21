@@ -1,10 +1,11 @@
 import { Button } from '@carbon/react';
-import { CardHeader } from '@openmrs/esm-patient-common-lib';
+import { CardHeader, EmptyState } from '@openmrs/esm-patient-common-lib';
 import React from 'react';
 import { AddIcon } from '@openmrs/esm-framework';
 import styles from '../immunizationSchedule/immunization-schedule.dashboard.scss';
 import { useTranslation } from 'react-i18next';
 import ImmunizationScheduleTile from './immunization-schedule.component.';
+import { useImmunizations } from '../../hooks/useImmunizations';
 
 interface ImmunizationScheduleDashboardProps {
   patientUuid: string;
@@ -12,25 +13,34 @@ interface ImmunizationScheduleDashboardProps {
 
 const ImmunizationScheduleDashboardTile: React.FC<ImmunizationScheduleDashboardProps> = ({ patientUuid }) => {
   const { t } = useTranslation();
+  const { data } = useImmunizations(patientUuid);
 
   const headerTitle = t('immunizationHistory', 'Immunization History');
-
-  return (
-    <div className={styles.widgetCard}>
-      <CardHeader title={headerTitle}>
-        <Button
-          kind="ghost"
-          renderIcon={(props) => <AddIcon size={16} {...props} />}
-          iconDescription="Add immunization"
-          onClick={() => {}}
-        >
-          {t('add', 'Add')}
-        </Button>
-      </CardHeader>
-      <div className={styles.content}>
-        <ImmunizationScheduleTile patientUuid={patientUuid} />
+  const displayText = t('noImmunizations', 'No immunizations have been recorded for this patient.');
+  if (data?.length) {
+    return (
+      <div className={styles.widgetCard}>
+        <CardHeader title={headerTitle}>
+          <Button
+            kind="ghost"
+            renderIcon={(props) => <AddIcon size={16} {...props} />}
+            iconDescription="Add immunization"
+            onClick={() => {}}
+          >
+            {t('add', 'Add')}
+          </Button>
+        </CardHeader>
+        <div className={styles.content}>
+          <ImmunizationScheduleTile patientUuid={patientUuid} />
+        </div>
       </div>
-    </div>
+    );
+  }
+  return (
+    <>
+      {' '}
+      <EmptyState headerTitle={headerTitle} displayText={displayText} />;
+    </>
   );
 };
 
