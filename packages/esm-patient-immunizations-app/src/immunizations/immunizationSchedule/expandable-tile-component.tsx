@@ -1,7 +1,7 @@
 // ExpandableTileComponent.tsx
 import React from 'react';
 import { ExpandableTile, TileAboveTheFoldContent, TileBelowTheFoldContent } from '@carbon/react';
-import styles from './immunization-schedule.scss'; // Reuse the same SCSS file
+import styles from './expandable-tile.scss';
 import { formatDate, parseDate, SyringeIcon } from '@openmrs/esm-framework';
 
 interface Dose {
