@@ -16,7 +16,7 @@ const vaccineNameAbbreviations = {
   'Vitamin A': 'Vitamin A',
 };
 
-const ImmunizationScheduleTile: React.FC<ImmunizationScheduleTileProps> = ({ patientUuid }) => {
+const ImmunizationSchedule: React.FC<ImmunizationScheduleTileProps> = ({ patientUuid }) => {
   const { data: existingImmunizations, error, isLoading } = useImmunizations(patientUuid);
 
   if (isLoading) {
@@ -32,39 +32,37 @@ const ImmunizationScheduleTile: React.FC<ImmunizationScheduleTileProps> = ({ pat
       <Grid fullWidth narrow className={styles.immunizationGrid}>
         <Column sm={4} md={8} lg={16} className={styles.container}>
           <div className={styles.vaccineRows}>
-            {existingImmunizations?.length === 0 ? (
-              existingImmunizations.map((immunization, index) => {
-                const sortedDoses = [...immunization.existingDoses].sort(
-                  (a, b) => new Date(a.occurrenceDateTime).getTime() - new Date(b.occurrenceDateTime).getTime(),
-                );
-                const displayVaccineName =
-                  vaccineNameAbbreviations[immunization.vaccineName] || immunization.vaccineName;
+            {existingImmunizations?.length > 0
+              ? existingImmunizations.map((immunization, index) => {
+                  const sortedDoses = [...immunization.existingDoses].sort(
+                    (a, b) => new Date(a.occurrenceDateTime).getTime() - new Date(b.occurrenceDateTime).getTime(),
+                  );
+                  const displayVaccineName =
+                    vaccineNameAbbreviations[immunization.vaccineName] || immunization.vaccineName;
 
-                return (
-                  <div key={index} className={styles.vaccineRow}>
-                    <div className={styles.vaccineName}>
-                      <Tile>{displayVaccineName}</Tile>
+                  return (
+                    <div key={index} className={styles.vaccineRow}>
+                      <div className={styles.vaccineName}>
+                        <Tile className={styles.vaccineName}>{displayVaccineName}</Tile>
+                      </div>
+                      <div className={styles.vaccineItem}>
+                        {sortedDoses.map((dose, doseIndex) => (
+                          <div key={doseIndex} className={styles.doseItem}>
+                            <ExpandableTileComponent
+                              index={index}
+                              doseIndex={doseIndex}
+                              dose={{
+                                ...dose,
+                                vaccineName: immunization.vaccineName,
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className={styles.vaccineItem}>
-                      {sortedDoses.map((dose, doseIndex) => (
-                        <div key={doseIndex} className={styles.doseItem}>
-                          <ExpandableTileComponent
-                            index={index}
-                            doseIndex={doseIndex}
-                            dose={{
-                              ...dose,
-                              vaccineName: immunization.vaccineName,
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <></>
-            )}
+                  );
+                })
+              : null}
           </div>
         </Column>
       </Grid>
@@ -72,4 +70,4 @@ const ImmunizationScheduleTile: React.FC<ImmunizationScheduleTileProps> = ({ pat
   );
 };
 
-export default ImmunizationScheduleTile;
+export default ImmunizationSchedule;

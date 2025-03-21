@@ -1,10 +1,10 @@
+import React from 'react';
 import { Button } from '@carbon/react';
 import { CardHeader, EmptyState } from '@openmrs/esm-patient-common-lib';
-import React from 'react';
 import { AddIcon } from '@openmrs/esm-framework';
 import styles from '../immunizationSchedule/immunization-schedule.dashboard.scss';
 import { useTranslation } from 'react-i18next';
-import ImmunizationScheduleTile from './immunization-schedule.component.';
+import ImmunizationSchedule from './immunization-schedule.component.';
 import { useImmunizations } from '../../hooks/useImmunizations';
 
 interface ImmunizationScheduleDashboardProps {
@@ -17,7 +17,8 @@ const ImmunizationScheduleDashboardTile: React.FC<ImmunizationScheduleDashboardP
 
   const headerTitle = t('immunizationHistory', 'Immunization History');
   const displayText = t('noImmunizations', 'No immunizations have been recorded for this patient.');
-  if (data?.length) {
+
+  if (data?.length > 0) {
     return (
       <div className={styles.widgetCard}>
         <CardHeader title={headerTitle}>
@@ -31,17 +32,13 @@ const ImmunizationScheduleDashboardTile: React.FC<ImmunizationScheduleDashboardP
           </Button>
         </CardHeader>
         <div className={styles.content}>
-          <ImmunizationScheduleTile patientUuid={patientUuid} />
+          <ImmunizationSchedule patientUuid={patientUuid} />
         </div>
       </div>
     );
   }
-  return (
-    <>
-      {' '}
-      <EmptyState headerTitle={headerTitle} displayText={displayText} />;
-    </>
-  );
+
+  return <EmptyState headerTitle={headerTitle} displayText={displayText} />;
 };
 
 export default ImmunizationScheduleDashboardTile;
