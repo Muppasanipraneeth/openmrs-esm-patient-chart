@@ -4,8 +4,7 @@ import { configSchema } from './config-schema';
 import { dashboardMeta } from './dashboard.meta';
 import immunizationsOverviewComponent from './immunizations/immunizations-overview.component';
 import immunizationsDetailedSummaryComponent from './immunizations/immunizations-detailed-summary.component';
-import ImmunizationScheduleDashboardComponent from './immunizations/immunizationSchedule/immunization-schedule.dashborad.compenent';
-import ImmunizationScheduleDashboardTile from './immunizations/immunizationScheduletile/immunization-schedule-tile-dashboard.component';
+import ImmunizationScheduleDashboardComponent from './immunizations/immunizationSchedule/immunization-schedule-dashboard.component';
 
 const moduleName = '@openmrs/esm-patient-immunizations-app';
 
@@ -25,8 +24,6 @@ export const immunizationsOverview = getSyncLifecycle(immunizationsOverviewCompo
 export const immunizationScheduleDashboard = getSyncLifecycle(ImmunizationScheduleDashboardComponent, options);
 
 export const immunizationsDetailedSummary = getSyncLifecycle(immunizationsDetailedSummaryComponent, options);
-
-export const immunizationScheduleDashTile = getSyncLifecycle(ImmunizationScheduleDashboardTile, options);
 
 export const immunizationsDashboardLink =
   // t('Immunizations', 'Immunizations')

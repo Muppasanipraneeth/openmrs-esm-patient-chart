@@ -1,144 +1,110 @@
 .immunizationSchedule {
-  padding: 15px;
+  padding: 24px;
+  border-radius: 8px;
 }
 
 .title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 20px;
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 24px;
   text-align: center;
+  color: #161616;
 }
 
 .immunizationGrid {
   display: flex;
   justify-content: center;
+  width: 100%;
 }
 
 .container {
   width: 100%;
   max-width: 1200px;
   overflow-x: auto;
+  padding: 0 16px;
+}
+
+.vaccineRows {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .vaccineRow {
   display: flex;
-  align-items: flex-start;
-  min-height: 80px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid #ddd;
-  padding: 4px;
+  align-items: center;
+  margin-bottom: 0;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 12px 16px;
 }
 
 .vaccineName {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 8px;
-  justify-content: center;
-  max-height: 80px;
-}
-.vaccineItem {
-  padding: 8px;
-  font-weight: bold;
-  text-align: center;
-  min-width: 200px;
-  max-width: 200px;
-  min-height: 80px;
-  max-height: 80px;
+  min-width: 220px;
+  max-width: 220px;
   display: flex;
   align-items: center;
-  font-size: 14px;
-  line-height: 1.3;
+  font-size: 16px;
+  font-weight: 600;
+  margin-right: 24px;
   position: sticky;
   left: 0;
   z-index: 1;
-  background: #e9ecef;
-  border-right: 2px solid #0066cc;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  .cds--tile {
+    width: 100%;
+    height: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+  }
 }
-
-.doseRow {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-left: 8px;
-  flex: 1;
-  overflow-x: auto;
+.doseNumber {
+  font-size: 14px;
+  font-weight: 600;
+  margin-right: 8px;
 }
-
-.doseSection {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.completedDoses {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-}
-
-.scheduledDoses {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.doseCard {
-  min-width: 120px;
-  padding: 8px;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 70px;
-  flex-shrink: 0;
-}
-
 .doseDate {
-  font-weight: bold;
-  font-size: 12px;
-  color: #333;
+  font-size: 14px;
+  font-weight: 400;
+  color: #666666;
 }
 
-.doseInfo {
-  margin: 4px 0;
-  font-size: 10px;
-  color: #555;
+.vaccineItem {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  flex: 1;
+  padding: 0 8px;
+  align-items: center;
 }
 
-.doseStatus {
-  margin-top: 4px;
+.doseItem {
+  padding: 22px;
+  border-radius: 4px;
+  max-width: 120px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
+  .immunizationSchedule {
+    padding: 16px;
+  }
+
   .vaccineRow {
     flex-direction: column;
-    align-items: stretch;
+    padding: 8px;
+  }
+
+  .vaccineName {
+    position: static;
+    min-width: 100%;
+    margin-right: 0;
+    margin-bottom: 12px;
   }
 
   .vaccineItem {
-    position: static;
-    border-right: none;
-    border-bottom: 2px solid #0066cc;
-    min-width: 100%;
-    max-width: 100%;
-  }
-
-  .doseRow {
-    padding-left: 0;
-  }
-
-  .completedDoses {
-    overflow-x: auto;
+    padding: 0;
   }
 }

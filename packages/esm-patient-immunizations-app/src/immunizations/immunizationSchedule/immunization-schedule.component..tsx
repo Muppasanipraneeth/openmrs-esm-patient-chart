@@ -1,6 +1,6 @@
 import React from 'react';
 import { useImmunizations } from '../../hooks/useImmunizations';
-import styles from './immunization-schedule-title.scss';
+import styles from './immunization-schedule.scss';
 import {
   Grid,
   Column,

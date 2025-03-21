@@ -1,35 +1,37 @@
-import { Button, InlineLoading } from '@carbon/react';
+import { Button } from '@carbon/react';
 import { CardHeader } from '@openmrs/esm-patient-common-lib';
 import React from 'react';
 import { AddIcon } from '@openmrs/esm-framework';
-import styles from './immunization-schedule.dashboard.scss';
+import styles from '../immunizationSchedule/immunization-schedule.dashboard.scss';
 import { useTranslation } from 'react-i18next';
-import ImmunizationSchedule from './immunization-schedule.component';
+import ImmunizationScheduleTile from './immunization-schedule.component.';
+
 interface ImmunizationScheduleDashboardProps {
   patientUuid: string;
 }
 
-const ImmunizationScheduleDashboardComponent: React.FC<ImmunizationScheduleDashboardProps> = ({ patientUuid }) => {
+const ImmunizationScheduleDashboardTile: React.FC<ImmunizationScheduleDashboardProps> = ({ patientUuid }) => {
   const { t } = useTranslation();
 
-  const headerTitle = t('immunizationSchedule', 'Immunization Schedule');
+  const headerTitle = t('immunizationHistory', 'Immunization History');
+
   return (
     <div className={styles.widgetCard}>
       <CardHeader title={headerTitle}>
-        {/* <span>{isValidating ? <InlineLoading /> : null}</span> */}
         <Button
           kind="ghost"
           renderIcon={(props) => <AddIcon size={16} {...props} />}
-          iconDescription="Add allergies"
+          iconDescription="Add immunization"
           onClick={() => {}}
         >
           {t('add', 'Add')}
         </Button>
       </CardHeader>
       <div className={styles.content}>
-        <ImmunizationSchedule patientUuid={patientUuid} />
+        <ImmunizationScheduleTile patientUuid={patientUuid} />
       </div>
     </div>
   );
 };
-export default ImmunizationScheduleDashboardComponent;
+
+export default ImmunizationScheduleDashboardTile;
