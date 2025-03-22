@@ -12,17 +12,22 @@ import {
   TableBody,
   TableCell,
 } from '@carbon/react';
-import { EditIcon, formatDate, getCoreTranslation, parseDate } from '@openmrs/esm-framework';
+import { EditIcon, formatDate, getCoreTranslation, parseDate, TrashCanIcon, showToast } from '@openmrs/esm-framework';
 import { type ImmunizationGrouped } from '../../types';
 import { immunizationFormSub } from '../utils';
 import styles from './immunizations-sequence-table.scss';
-
+import { deletePatientImmunization } from '../immunizations.resource';
 interface SequenceTableProps {
   immunizationsByVaccine: ImmunizationGrouped;
   launchPatientImmunizationForm: () => void;
+  onDoseDeleted?: () => void;
 }
 
-const SequenceTable: React.FC<SequenceTableProps> = ({ immunizationsByVaccine, launchPatientImmunizationForm }) => {
+const SequenceTable: React.FC<SequenceTableProps> = ({
+  immunizationsByVaccine,
+  launchPatientImmunizationForm,
+  onDoseDeleted,
+}) => {
   const { t } = useTranslation();
   const { existingDoses, sequences, vaccineUuid } = immunizationsByVaccine;
 
@@ -32,9 +37,30 @@ const SequenceTable: React.FC<SequenceTableProps> = ({ immunizationsByVaccine, l
       { key: 'vaccinationDate', header: t('vaccinationDate', 'Vaccination date') },
       { key: 'expirationDate', header: t('expirationDate', 'Expiration date') },
       { key: 'edit', header: '' },
+      { key: 'delete', header: '' },
     ],
     [t, sequences.length],
   );
+
+  const handleDeleteDose = async (immunizationId: string) => {
+    try {
+      await deletePatientImmunization(immunizationId, new AbortController());
+
+      showToast({
+        title: t('immunizationDeleted', 'Immunization Deleted'),
+        description: t('immunizationDeletedSuccess', 'The immunization dose has been successfully deleted'),
+        kind: 'success',
+      });
+
+      onDoseDeleted?.();
+    } catch (error) {
+      showToast({
+        title: t('error', 'Error'),
+        description: t('immunizationDeleteError', 'Failed to delete immunization: ') + error.message,
+        kind: 'error',
+      });
+    }
+  };
 
   const tableRows = existingDoses?.map((dose) => {
     return {
@@ -64,6 +90,16 @@ const SequenceTable: React.FC<SequenceTableProps> = ({ immunizationsByVaccine, l
           }}
         >
           {t('edit', 'Edit')}
+        </Button>
+      ),
+      delete: (
+        <Button
+          kind="ghost"
+          iconDescription={t('delete', 'Delete')}
+          renderIcon={(props: ComponentProps<typeof TrashCanIcon>) => <TrashCanIcon size={16} {...props} />}
+          onClick={() => handleDeleteDose(dose.immunizationObsUuid)}
+        >
+          {t('delete', 'Delete')}
         </Button>
       ),
     };

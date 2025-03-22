@@ -19,3 +19,10 @@ export function savePatientImmunization(
     signal: abortController.signal,
   });
 }
+
+export function deletePatientImmunization(immunizationUuid: string, abortController: AbortController) {
+  return openmrsFetch(`${fhirBaseUrl}/Immunization/${immunizationUuid}`, {
+    method: 'DELETE',
+    signal: abortController.signal,
+  });
+}

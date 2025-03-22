@@ -83,7 +83,7 @@ const ImmunizationsDetailedSummary: React.FC<ImmunizationsDetailedSummaryProps> 
       sortedImmunizations?.map((immunization) => {
         const occurrenceDate =
           isEmpty(immunization.sequences) && !isEmpty(immunization.existingDoses)
-            ? `${t('singleDoseOn', 'Single Dose on')} ${new Date(
+            ? `${t('lastDoseOn', 'Last Dose on')} ${new Date(
                 first<ExistingDoses>(immunization.existingDoses.sort(latestFirst))?.occurrenceDateTime,
               ).toLocaleDateString(locale, { dateStyle: 'medium' })}`
             : !isEmpty(immunization.existingDoses)

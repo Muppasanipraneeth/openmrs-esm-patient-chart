@@ -61,8 +61,8 @@ const ImmunizationsOverview: React.FC<ImmunizationsOverviewProps> = ({ patient, 
       id: `${index}`,
       vaccineName: immunization.vaccineName,
       vaccinationDate: `${formatDate(parseDate(immunization.existingDoses[0].occurrenceDateTime), {
-        day: false,
-        time: false,
+        mode: 'standard',
+        time: 'for today',
       })}`,
     }));
   }, [paginatedImmunizations]);
