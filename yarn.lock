@@ -4741,6 +4741,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@openmrs/esm-patient-growth-chart-app@workspace:packages/esm-patient-growth-chart-app":
+  version: 0.0.0-use.local
+  resolution: "@openmrs/esm-patient-growth-chart-app@workspace:packages/esm-patient-growth-chart-app"
+  dependencies:
+    "@carbon/react": "npm:^1.12.0"
+    "@hookform/resolvers": "npm:^3.3.1"
+    "@openmrs/esm-patient-common-lib": "npm:next"
+    lodash-es: "npm:^4.17.21"
+    react-hook-form: "npm:^7.46.2"
+    webpack: "npm:^5.94.0"
+    zod: "npm:^3.22.2"
+  peerDependencies:
+    "@openmrs/esm-framework": 6.x
+    "@openmrs/esm-patient-common-lib": 9.x
+    dayjs: 1.x
+    react: 18.x
+    react-i18next: 11.x
+    react-router-dom: 6.x
+    rxjs: 6.x
+    swr: 2.x
+  languageName: unknown
+  linkType: soft
+
 "@openmrs/esm-patient-immunizations-app@workspace:packages/esm-patient-immunizations-app":
   version: 0.0.0-use.local
   resolution: "@openmrs/esm-patient-immunizations-app@workspace:packages/esm-patient-immunizations-app"

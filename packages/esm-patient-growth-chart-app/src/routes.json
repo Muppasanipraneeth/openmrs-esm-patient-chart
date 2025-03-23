@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "webservices.rest": "^2.2.0"
+  },
+  "extensions": [
+    {
+      "name": "growthchart-overview-widget",
+      "component": "growthchartOverview",
+      "order": 9
+    },
+    {
+      "name": "growthchart-details-widget",
+      "component": "growthchartDetailedSummary",
+      "slot": "patient-chart-growthchart-dashboard-slot"
+    },
+    {
+      "name": "growthchart-summary-dashboard",
+      "component": "growthchartDashboardLink",
+      "slot": "patient-chart-dashboard-slot",
+      "meta": {
+        "slot": "patient-chart-growthchart-dashboard-slot",
+        "path": "Growthchart"
+      },
+      "order": 8
+    }
+  ],
+  "pages": []
+}
+
