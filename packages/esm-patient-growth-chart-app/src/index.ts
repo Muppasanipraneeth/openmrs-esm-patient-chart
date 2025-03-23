@@ -21,6 +21,10 @@ export function startupApp() {
 export const growthchartOverview = getSyncLifecycle(growthchartOverviewComponent, options);
 
 export const growthchartDetailedSummary = getSyncLifecycle(growthchartDetailedSummaryComponent, options);
+export const growthchartFormWorkspace = getAsyncLifecycle(
+  () => import('./growthchart/growthchart-form.workspace'),
+  options,
+);
 
 export const growthchartDashboardLink = getSyncLifecycle(
   createDashboardLink({

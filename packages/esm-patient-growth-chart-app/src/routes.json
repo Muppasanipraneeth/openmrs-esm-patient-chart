@@ -25,6 +25,13 @@
       "order": 8
     }
   ],
-  "pages": []
+  "pages": [],
+  "workspaces": [
+    {
+      "name": "growthchart-form-workspace",
+      "title": "GrowthchartForm",
+      "component": "growthchartFormWorkspace"
+    }
+  ]
 }
 
