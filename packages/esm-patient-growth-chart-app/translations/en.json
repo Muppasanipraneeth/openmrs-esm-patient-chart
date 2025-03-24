@@ -1,1 +1,9 @@
-{}
+{
+  "chartView": "Chart View",
+  "dateAndTime": "Date and time",
+  "displaying": "Displaying",
+  "encounterType": "Encounter type",
+  "growthChart": "Growth Chart",
+  "noResults": "No results found",
+  "tableView": "Table View"
+}
