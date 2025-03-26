@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { LineChart } from '@carbon/charts-react';
 import '@carbon/charts/styles.css';
 import { Tab, Tabs, TabList } from '@carbon/react';
-import classNames from 'classnames';
 
 import percentileData from '../utils/json/wtage.json';
 import styles from './obs-graph.scss';
@@ -33,56 +32,63 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
   const [chartData, setChartData] = useState<any[]>([]);
   const { data } = useBiometrics(patientUuid);
   const selectedGender = patient.gender === 'male' ? 'boys' : 'girls';
-  // console.log(data);
-  // console.log(patient.birthDate);
-  // console.log(patientUuid);
 
   useEffect(() => {
-    const dataSource = percentileData[selectedGender];
-    const inToMonths = (date) => {
-      // console.log(date);
+    if (!patient.birthDate || !data.length) return;
 
+    const dataSource = percentileData[selectedGender];
+
+    const inToMonths = (measurementDate: string): number => {
       const birthDate = new Date(patient.birthDate);
-      const currentDate = new Date(date);
+      const currentDate = new Date(measurementDate);
+      if (isNaN(birthDate.getTime()) || isNaN(currentDate.getTime())) {
+        console.error('Invalid date:', { birthDate, measurementDate });
+        return 0;
+      }
       const diffTime = currentDate.getTime() - birthDate.getTime();
-      const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.44));
-      return diffMonths;
+      const diffMonths = diffTime / (1000 * 60 * 60 * 24 * 30.44);
+      return Number(diffMonths.toFixed(2));
     };
 
-    const mappedData = [
+    const mappedPercentileData = [
       ...dataSource.P3.map((d: { age: number; weight: number }) => ({
         group: 'P3',
-        key: d.age.toString(),
+        key: d.age,
         value: d.weight,
       })),
       ...dataSource.P15.map((d: { age: number; weight: number }) => ({
         group: 'P15',
-        key: d.age.toString(),
+        key: d.age,
         value: d.weight,
       })),
       ...dataSource.P50.map((d: { age: number; weight: number }) => ({
         group: 'P50',
-        key: d.age.toString(),
+        key: d.age,
         value: d.weight,
       })),
       ...dataSource.P85.map((d: { age: number; weight: number }) => ({
         group: 'P85',
-        key: d.age.toString(),
+        key: d.age,
         value: d.weight,
       })),
       ...dataSource.P97.map((d: { age: number; weight: number }) => ({
         group: 'P97',
-        key: d.age.toString(),
-        value: d.weight,
-      })),
-      ...data.map((d) => ({
-        group: 'Patient',
-        key: inToMonths(d.date),
+        key: d.age,
         value: d.weight,
       })),
     ];
 
-    setChartData(mappedData);
+    const mappedPatientData = data.map((d) => {
+      const ageInMonths = inToMonths(d.date);
+      return {
+        group: 'Patient',
+        key: ageInMonths,
+        value: d.weight,
+      };
+    });
+
+    const combinedData = [...mappedPercentileData, ...mappedPatientData];
+    setChartData(combinedData);
   }, [patientUuid, data, selectedGender, patient.birthDate]);
 
   const chartColors = {
@@ -100,13 +106,14 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
       bottom: {
         title: 'Age (Months)',
         mapsTo: 'key',
-        scaleType: ScaleTypes.LABELS,
+        scaleType: ScaleTypes.LINEAR,
+        domain: [0, 24],
       },
       left: {
         title: 'Weight (kg)',
         mapsTo: 'value',
         scaleType: ScaleTypes.LINEAR,
-        includeZero: false,
+        includeZero: true,
       },
     },
     legend: {
@@ -115,10 +122,16 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
     },
     tooltip: {
       enabled: true,
-      customHTML: (data: any) =>
-        data.group === 'Patient'
-          ? `<div>Patient: ${data.value} kg</div>`
-          : `<div>${data.group}: ${data.value} kg</div>`,
+      customHTML: (data: any[]) => {
+        const point = data[0];
+        if (!point) return '<div>No data</div>';
+
+        const group = point.group || 'Unknown';
+        const value = point.value !== undefined ? point.value : 'N/A';
+        const key = point.key !== undefined ? point.key : 'N/A';
+
+        return `<div>${group}: ${value} kg at ${key} months</div>`;
+      },
     },
     curve: 'curveMonotoneX',
     points: {

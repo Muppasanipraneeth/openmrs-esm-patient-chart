@@ -28,7 +28,7 @@ export const SaveBiometric = async (patientUuid, biometricData) => {
     throw new Error(`Failed to post biometric data: ${response.status}`);
   }
 
-  return response.json();
+  return response;
 };
 
 export const useBiometrics = (patientUuid) => {
@@ -48,10 +48,11 @@ export const useBiometrics = (patientUuid) => {
 
   const addBiometric = async (biometricData) => {
     try {
-      const newData = await SaveBiometric(patientUuid, biometricData);
+      const response = await SaveBiometric(patientUuid, biometricData);
+      const newData = await response.json();
 
       swrMutate(newData.measurements, false);
-      return newData;
+      return response;
     } catch (err) {
       throw new Error(err.message || 'Failed to add biometric');
     }

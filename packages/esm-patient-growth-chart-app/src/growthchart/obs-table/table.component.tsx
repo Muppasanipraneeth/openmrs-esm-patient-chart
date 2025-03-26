@@ -32,7 +32,7 @@ const ObsTable: React.FC<ObsTableProps> = ({ patientUuid }) => {
         id: `${index}`,
         date: formatDatetime(new Date(entry.date), { mode: 'wide' }),
         [config.concepts.weightUuid]: entry.weight % 1 !== 0 ? entry.weight.toFixed(1) : entry.weight,
-        [config.concepts.heightUuid]: entry.height,
+        [config.concepts.lengthUuid]: entry.length,
         [config.concepts.bmiUuid]: entry.bmi % 1 !== 0 ? entry.bmi.toFixed(1) : entry.bmi,
       };
       return rowData;
@@ -42,7 +42,7 @@ const ObsTable: React.FC<ObsTableProps> = ({ patientUuid }) => {
   const tableHeaders = [
     { key: 'date', header: t('dateAndTime', 'Date and time'), isSortable: true },
     { key: config.concepts.weightUuid, header: `Weight (${config.biometrics.weightUnit})` },
-    { key: config.concepts.heightUuid, header: `Height (${config.biometrics.heightUnit})` },
+    { key: config.concepts.lengthUuid, header: `Lenght (${config.biometrics.lengthUnit})` },
     { key: config.concepts.bmiUuid, header: `BMI (${config.biometrics.bmiUnit})` },
   ];
 

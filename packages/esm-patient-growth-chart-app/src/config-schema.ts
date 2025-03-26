@@ -4,7 +4,7 @@ export const configSchema = {
       _type: 'string',
       _default: '5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
     },
-    heightUuid: {
+    lengthUuid: {
       _type: 'string',
       _default: '5090AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
     },
@@ -30,7 +30,7 @@ export const configSchema = {
       _type: 'string',
       _default: 'kg',
     },
-    heightUnit: {
+    lengthUnit: {
       _type: 'string',
       _default: 'Cm',
     },
@@ -40,13 +40,13 @@ export const configSchema = {
 export interface BiometricsConfigObject {
   bmiUnit: string;
   weightUnit: string;
-  heightUnit: string;
+  lengthUnit: string;
 }
 
 export interface ConfigObject {
   concepts: {
     weightUuid: string;
-    heightUuid: string;
+    lengthUuid: string;
     bmiUuid: string;
     vitalSignsConceptSetUuid: string;
     dateUuid: Date;
