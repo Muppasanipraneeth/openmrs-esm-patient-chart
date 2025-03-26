@@ -2,17 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { LineChart } from '@carbon/charts-react';
 import '@carbon/charts/styles.css';
 import { Tab, Tabs, TabList } from '@carbon/react';
+import { useConfig } from '@openmrs/esm-framework';
+import { useTranslation } from 'react-i18next';
 
 import percentileData from '../utils/json/wtage.json';
 import styles from './obs-graph.scss';
 import { useBiometrics } from '../resource-data';
+import classNames from 'classnames';
+import { t } from 'i18next';
 
 export interface GrowthChartOverviewProps {
   basePath: string;
   patient: fhir.Patient;
   patientUuid: string;
 }
-
+export interface ConceptDescriptor {
+  label: string;
+  uuid: string;
+}
 enum ScaleTypes {
   TIME = 'time',
   LINEAR = 'linear',
@@ -31,6 +38,14 @@ enum LegendPositions {
 const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, patientUuid }) => {
   const [chartData, setChartData] = useState<any[]>([]);
   const { data } = useBiometrics(patientUuid);
+  const config = useConfig();
+  const { t } = useTranslation();
+
+  const [selectedConcept, setSelectedConcept] = React.useState<ConceptDescriptor>({
+    label: config.data[0]?.label,
+    uuid: config.data[0]?.concept,
+  });
+
   const selectedGender = patient.gender === 'male' ? 'boys' : 'girls';
 
   useEffect(() => {
@@ -147,10 +162,35 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
   return (
     <div className={styles.graphContainer}>
       <div className={styles.conceptPickerTabs}>
-        <Tabs className={styles.verticalTabs}>
-          <TabList aria-label="Gender tabs"></TabList>
+        <label className={styles.conceptLabel} htmlFor="concept-tab-group">
+          {t('displaying', 'Displaying')}
+        </label>
+        <Tabs id="concept-tab-group" className={styles.verticalTabs} type="default">
+          <TabList className={styles.tablist} aria-label="Obs tabs">
+            {config.data.map(({ concept, label }, index) => {
+              const tabClasses = classNames(styles.tab, styles.bodyLong01, {
+                [styles.selectedTab]: selectedConcept.label === label,
+              });
+
+              return (
+                <Tab
+                  key={concept}
+                  className={tabClasses}
+                  onClick={() =>
+                    setSelectedConcept({
+                      label,
+                      uuid: concept,
+                    })
+                  }
+                >
+                  {label}
+                </Tab>
+              );
+            })}
+          </TabList>
         </Tabs>
       </div>
+
       <div className={styles.lineChartContainer}>
         {chartData.length > 0 ? <LineChart data={chartData} options={chartOptions} /> : <p>Loading chart data...</p>}
       </div>
