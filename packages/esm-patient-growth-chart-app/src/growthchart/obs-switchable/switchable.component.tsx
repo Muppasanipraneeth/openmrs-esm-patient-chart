@@ -1,32 +1,57 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, DataTableSkeleton, InlineLoading } from '@carbon/react';
 import { ChartLineSmooth, Table } from '@carbon/react/icons';
-import { CardHeader, EmptyState, ErrorState } from '@openmrs/esm-patient-common-lib';
-import { useConfig } from '@openmrs/esm-framework';
-// import { useObs } from '../resources/useObs';
-import { type ConfigObject } from '../config-schema';
-import ObsGraph from '../obs-graph/obs-graph.component';
-import ObsTable from '../obs-table/obs-table.component';
+import { CardHeader, EmptyState, ErrorState, launchPatientWorkspace } from '@openmrs/esm-patient-common-lib';
+import GrowthChartOverview from '../obs-graph/graph.component';
+import ObsTable from '../obs-table/table.component';
 import styles from './obs-switchable.scss';
+import { AddIcon } from '@openmrs/esm-framework';
 
 interface ObsSwitchableProps {
   patientUuid: string;
+  patient: fhir.Patient;
+  basePath: string;
 }
 
-const ObsSwitchable: React.FC<ObsSwitchableProps> = ({ patientUuid }) => {
+const obss = [
+  {
+    conceptUuid: '5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    dataType: 'Number',
+    effectiveDateTime: '2023-01-15T00:00:00Z',
+    valueQuantity: { value: 3.5, unit: 'kg' },
+  },
+  {
+    conceptUuid: '5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    dataType: 'Number',
+    effectiveDateTime: '2023-03-15T00:00:00Z',
+    valueQuantity: { value: 4.2, unit: 'kg' },
+  },
+  {
+    conceptUuid: '5089AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    dataType: 'Number',
+    effectiveDateTime: '2023-06-15T00:00:00Z',
+    valueQuantity: { value: 5.1, unit: 'kg' },
+  },
+];
+const isLoading = false;
+const error = null;
+const isValidating = false;
+
+const ObsSwitchable: React.FC<ObsSwitchableProps> = ({ patientUuid, patient, basePath }) => {
   const { t } = useTranslation();
   const [chartView, setChartView] = React.useState<boolean>(false);
 
-  //   const { data: obss, error, isLoading, isValidating } = useObs(patientUuid);
-
-  //   const hasNumberType = obss.find((obs) => obs.dataType === 'Number');
+  const hasNumberType = obss?.find((obs) => obs.dataType === 'Number');
+  const launchDetailsForm = useCallback(() => {
+    launchPatientWorkspace('growthchart-form-workspace');
+  }, []);
 
   return (
     <>
       {(() => {
-        // if (isLoading) return <DataTableSkeleton role="progressbar" />;
-        // if (error) return <ErrorState error={error} headerTitle={t('growthChart', 'Growth Chart')} />;
+        if (isLoading) return <DataTableSkeleton role="progressbar" />;
+        if (error) return <ErrorState error={error} headerTitle={t('growthChart', 'Growth Chart')} />;
         if (obss?.length) {
           return (
             <div className={styles.widgetContainer}>
@@ -55,11 +80,26 @@ const ObsSwitchable: React.FC<ObsSwitchableProps> = ({ patientUuid }) => {
                         iconDescription={t('chartView', 'Chart View')}
                         onClick={() => setChartView(true)}
                       />
+                      <span className={styles.line}></span>
+                      <Button
+                        kind="ghost"
+                        renderIcon={(props) => <AddIcon size={16} {...props} />}
+                        iconDescription="Add allergies"
+                        onClick={() => {
+                          launchDetailsForm();
+                        }}
+                      >
+                        Add
+                      </Button>
                     </div>
                   </div>
                 ) : null}
               </CardHeader>
-              {chartView ? <ObsGraph patientUuid={patientUuid} /> : <ObsTable patientUuid={patientUuid} />}
+              {chartView ? (
+                <GrowthChartOverview patientUuid={patientUuid} patient={patient} basePath={basePath} />
+              ) : (
+                <ObsTable patientUuid={patientUuid} />
+              )}
             </div>
           );
         }

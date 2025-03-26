@@ -12,6 +12,10 @@ export const configSchema = {
       _type: 'string',
       _default: '1342AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
     },
+    dateUuid: {
+      _type: 'date',
+      _default: '160753AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+    },
     vitalSignsConceptSetUuid: {
       _type: 'string',
       _default: '160575AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
@@ -35,6 +39,8 @@ export const configSchema = {
 
 export interface BiometricsConfigObject {
   bmiUnit: string;
+  weightUnit: string;
+  heightUnit: string;
 }
 
 export interface ConfigObject {
@@ -43,6 +49,7 @@ export interface ConfigObject {
     heightUuid: string;
     bmiUuid: string;
     vitalSignsConceptSetUuid: string;
+    dateUuid: Date;
   };
   biometrics: BiometricsConfigObject;
 }

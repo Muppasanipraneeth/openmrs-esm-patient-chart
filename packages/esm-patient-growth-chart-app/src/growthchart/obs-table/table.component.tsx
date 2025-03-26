@@ -9,11 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from '@carbon/react';
-import { usePagination, useConfig, formatDatetime, formatDate, formatTime } from '@openmrs/esm-framework';
+import { usePagination, formatDatetime, useConfig } from '@openmrs/esm-framework';
 import { PatientChartPagination } from '@openmrs/esm-patient-common-lib';
-import { useObs } from '../resources/useObs';
-import styles from './obs-table.scss';
 import { useTranslation } from 'react-i18next';
+import styles from './obs-table.scss';
+import type { ConfigObject } from '../../config-schema';
+import { useBiometrics } from '../../growthchart/resource-data';
 
 interface ObsTableProps {
   patientUuid: string;
@@ -21,86 +22,38 @@ interface ObsTableProps {
 
 const ObsTable: React.FC<ObsTableProps> = ({ patientUuid }) => {
   const { t } = useTranslation();
-  const config = useConfig();
-  const { data: obss } = useObs(patientUuid, config.showEncounterType);
-  const uniqueEncounterUuids = [...new Set(obss.map((o) => o.encounter.reference))].sort();
-  const obssGroupedByEncounters = uniqueEncounterUuids.map((date) =>
-    obss.filter((o) => o.encounter.reference === date),
-  );
+  const config = useConfig<ConfigObject>();
+  const { data, isLoading, isValidating, error } = useBiometrics(patientUuid);
+
+  const tableRows = React.useMemo(() => {
+    if (!data || !Array.isArray(data)) return [];
+    return data.map((entry, index) => {
+      const rowData = {
+        id: `${index}`,
+        date: formatDatetime(new Date(entry.date), { mode: 'wide' }),
+        [config.concepts.weightUuid]: entry.weight % 1 !== 0 ? entry.weight.toFixed(1) : entry.weight,
+        [config.concepts.heightUuid]: entry.height,
+        [config.concepts.bmiUuid]: entry.bmi % 1 !== 0 ? entry.bmi.toFixed(1) : entry.bmi,
+      };
+      return rowData;
+    });
+  }, [data, config.concepts]);
 
   const tableHeaders = [
     { key: 'date', header: t('dateAndTime', 'Date and time'), isSortable: true },
-    ...config.data.map(({ concept, label }) => ({
-      key: concept,
-      header: label,
-    })),
+    { key: config.concepts.weightUuid, header: `Weight (${config.biometrics.weightUnit})` },
+    { key: config.concepts.heightUuid, header: `Height (${config.biometrics.heightUnit})` },
+    { key: config.concepts.bmiUuid, header: `BMI (${config.biometrics.bmiUnit})` },
   ];
 
-  if (config.showEncounterType) {
-    tableHeaders.splice(1, 0, { key: 'encounter', header: t('encounterType', 'Encounter type'), isSortable: true });
-  }
+  const { results, goTo, currentPage } = usePagination(tableRows, 5);
 
-  const tableRows = React.useMemo(
-    () =>
-      obssGroupedByEncounters?.map((obss, index) => {
-        const rowData = {
-          id: `${index}`,
-          date: formatDatetime(new Date(obss[0].effectiveDateTime), { mode: 'wide' }),
-          encounter: obss[0].encounter.name,
-        };
-
-        for (const obs of obss) {
-          switch (obs.dataType) {
-            case 'Text':
-              rowData[obs.conceptUuid] = obs.valueString;
-              break;
-
-            case 'Number': {
-              const decimalPlaces: number | undefined = config.data.find(
-                (ele: any) => ele.concept === obs.conceptUuid,
-              )?.decimalPlaces;
-
-              if (obs.valueQuantity?.value % 1 !== 0) {
-                if (decimalPlaces > 0) {
-                  rowData[obs.conceptUuid] = obs.valueQuantity?.value.toFixed(decimalPlaces);
-                } else {
-                  rowData[obs.conceptUuid] = obs.valueQuantity?.value.toFixed(2);
-                }
-              } else {
-                rowData[obs.conceptUuid] = obs.valueQuantity?.value;
-              }
-              break;
-            }
-
-            case 'Coded':
-              rowData[obs.conceptUuid] = obs.valueCodeableConcept?.coding[0]?.display;
-              break;
-
-            case 'DateTime':
-              if (config?.dateFormat === 'dateTime') {
-                rowData[obs.conceptUuid] = formatDatetime(new Date(obs.valueDateTime), { mode: 'standard' });
-              } else if (config?.dateFormat === 'time') {
-                rowData[obs.conceptUuid] = formatTime(new Date(obs.valueDateTime));
-              } else if (config?.dateFormat === 'date') {
-                rowData[obs.conceptUuid] = formatDate(new Date(obs.valueDateTime), { mode: 'standard' });
-              } else {
-                //maintain the default behavior
-                rowData[obs.conceptUuid] = formatDatetime(new Date(obs.valueDateTime), { mode: 'standard' });
-              }
-
-              break;
-          }
-        }
-
-        return rowData;
-      }),
-    [config.data, config?.dateFormat, obssGroupedByEncounters],
-  );
-
-  const { results, goTo, currentPage } = usePagination(tableRows, config.table.pageSize);
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div>
+      {isValidating && <div>Updating...</div>}
       <DataTable rows={results} headers={tableHeaders} isSortable size="sm" useZebraStyles>
         {({ rows, headers, getHeaderProps, getTableProps }) => (
           <TableContainer>
@@ -137,7 +90,7 @@ const ObsTable: React.FC<ObsTableProps> = ({ patientUuid }) => {
         pageNumber={currentPage}
         totalItems={tableRows.length}
         currentItems={results.length}
-        pageSize={config.table.pageSize}
+        pageSize={5}
         onPageNumberChange={({ page }) => goTo(page)}
       />
     </div>
