@@ -1,7 +1,20 @@
 {
+  "BiometricsNowAvailable": "Now visible on the Growth Chart",
+  "BiometricsRecorded": "Baby Growth Data Saved",
+  "BiometricsSaveError": "Error saving growth data",
+  "cancel": "Cancel",
   "chartView": "Chart View",
+  "checkForValidity": "Some values may be invalid",
+  "date": "Date",
   "dateAndTime": "Date and time",
+  "enterLength": "Enter length in cm",
+  "enterMuac": "Enter MUAC in cm (optional)",
+  "enterWeight": "Enter weight in kg",
   "growthChart": "Growth Chart",
+  "length": "Length (cm)",
+  "muac": "MUAC (cm)",
   "noResults": "No results found",
-  "tableView": "Table View"
+  "submit": "Submit",
+  "tableView": "Table View",
+  "weight": "Weight (kg)"
 }

@@ -1,33 +1,75 @@
-import React from 'react';
-import { useForm, Controller, FormProvider } from 'react-hook-form';
-import { SaveBiometric } from './resource-data';
-import { Button } from '@carbon/react';
-import { showSnackbar } from '@openmrs/esm-framework';
+import React, { useEffect, useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button, ButtonSet, Column, Form, InlineNotification, Row, Stack } from '@carbon/react';
+import {
+  showSnackbar,
+  useLayoutType,
+  useConfig,
+  useSession,
+  useVisit,
+  OpenmrsDatePicker,
+} from '@openmrs/esm-framework';
+import type { ConfigObject } from '../config-schema';
+import { SaveBiometric } from './resource-data';
+import BiometricsInput from './biometric-input.component';
+import styles from './growth-form.scss';
+export interface GrowthChartFormData {
+  date: string;
+  length: number;
+  weight: number;
+  muac?: number;
+  computedBodyMassIndex?: number;
+}
+
+const GrowthChartFormSchema = z
+  .object({
+    date: z.date({ required_error: 'Date is required' }),
+    length: z.number().min(0, { message: 'Length must be positive' }),
+    weight: z.number().min(0, { message: 'Weight must be positive' }),
+    muac: z.number().min(0, { message: 'MUAC must be positive' }).optional(),
+    computedBodyMassIndex: z.number().optional(),
+  })
+  .refine((fields) => fields.length && fields.weight, {
+    message: 'Length and weight are required',
+    path: ['oneFieldRequired'],
+  });
 
 interface GrowthChartFormProps {
   basePath: string;
   patient: fhir.Patient;
   patientUuid: string;
+  closeWorkspace: () => void;
+  closeWorkspaceWithSavedChanges: () => void;
+  promptBeforeClosing: () => Promise<boolean>;
 }
 
-const HEIGHT_THRESHOLDS = {
-  critically_low: 20,
-  low: 25,
-  high: 200,
-  critically_high: 250,
+const LENGTH_THRESHOLDS = {
+  critically_low: 45,
+  low: 49,
+  high: 90,
+  critically_high: 100,
 };
 
 const WEIGHT_THRESHOLDS = {
-  critically_low: 1,
-  low: 1.2,
-  high: 150,
-  critically_high: 200,
+  critically_low: 2,
+  low: 2.5,
+  high: 15,
+  critically_high: 20,
 };
 
-const calculateBMI = (height: number, weight: number): number => {
-  const heightInMeters = height / 100;
-  return Number((weight / (heightInMeters * heightInMeters)).toFixed(1));
+const MUAC_THRESHOLDS = {
+  critically_low: 11,
+  low: 12.5,
+  high: 16,
+  critically_high: 18,
+};
+
+const calculateBMI = (length: number, weight: number): number => {
+  const lengthInMeters = length / 100;
+  return Number((weight / (lengthInMeters * lengthInMeters)).toFixed(1));
 };
 
 const getInterpretation = (value: number, thresholds: Record<string, number>): string => {
@@ -38,34 +80,77 @@ const getInterpretation = (value: number, thresholds: Record<string, number>): s
   return 'normal';
 };
 
-const GrowthChartForm: React.FC<GrowthChartFormProps> = ({ basePath, patient, patientUuid }) => {
+const GrowthChartForm: React.FC<GrowthChartFormProps> = ({
+  basePath,
+  patient,
+  patientUuid,
+  closeWorkspace,
+  closeWorkspaceWithSavedChanges,
+  promptBeforeClosing,
+}) => {
   const { t } = useTranslation();
-  const methods = useForm({
+  const isTablet = useLayoutType() === 'tablet';
+  const config = useConfig<ConfigObject>();
+  const session = useSession();
+  const { currentVisit } = useVisit(patientUuid);
+  const [showErrorNotification, setShowErrorNotification] = useState(false);
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { isDirty, isSubmitting },
+  } = useForm<GrowthChartFormData>({
+    mode: 'all',
+    resolver: zodResolver(GrowthChartFormSchema),
     defaultValues: {
       date: new Date().toISOString().split('T')[0],
-      height: '',
-      weight: '',
-      MUAC: '',
+      length: undefined,
+      weight: undefined,
+      muac: undefined,
+      computedBodyMassIndex: undefined,
     },
   });
 
-  const onSubmit = (data: any) => {
-    const height = Number(data.height);
-    const weight = Number(data.weight);
-    const bmi = calculateBMI(height, weight);
-    const MUAC = Number(data.MUAC);
+  useEffect(() => {
+    if (isDirty) {
+      promptBeforeClosing();
+    }
+  }, [isDirty, promptBeforeClosing]);
+
+  const length = watch('length');
+  const weight = watch('weight');
+  const muac = watch('muac');
+
+  useEffect(() => {
+    if (length && weight) {
+      const computedBodyMassIndex = calculateBMI(length, weight);
+      setValue('computedBodyMassIndex', computedBodyMassIndex);
+    }
+  }, [length, weight, setValue]);
+
+  const onError = (err: any) => {
+    if (err?.oneFieldRequired || err.length || err.weight) {
+      setShowErrorNotification(true);
+    }
+  };
+
+  const saveGrowthData = (data: GrowthChartFormData) => {
+    setShowErrorNotification(false);
 
     const formattedData = {
       patientUuid,
       measurements: [
         {
           date: new Date(data.date),
-          height,
-          heightRenderInterpretation: getInterpretation(height, HEIGHT_THRESHOLDS),
-          weight,
-          weightRenderInterpretation: getInterpretation(weight, WEIGHT_THRESHOLDS),
-          bmi,
-          MUAC,
+          length: data.length,
+          lengthRenderInterpretation: getInterpretation(data.length, LENGTH_THRESHOLDS),
+          weight: data.weight,
+          weightRenderInterpretation: getInterpretation(data.weight, WEIGHT_THRESHOLDS),
+          muac: data.muac || null,
+          muacRenderInterpretation: data.muac ? getInterpretation(data.muac, MUAC_THRESHOLDS) : 'not_measured',
+          bmi: data.computedBodyMassIndex,
         },
       ],
     };
@@ -73,85 +158,165 @@ const GrowthChartForm: React.FC<GrowthChartFormProps> = ({ basePath, patient, pa
     SaveBiometric(patientUuid, formattedData)
       .then((response) => {
         if (response.status === 201) {
-          // closeWorkspaceWithSavedChanges();
           showSnackbar({
             isLowContrast: true,
             kind: 'success',
-            title: t('vitalsAndBiometricsRecorded', 'Vitals and Biometrics saved'),
-            subtitle: t('vitalsAndBiometricsNowAvailable', 'They are now visible on the Vitals and Biometrics page'),
+            title: t('BiometricsRecorded', 'Baby Growth Data Saved'),
+            subtitle: t('BiometricsNowAvailable', 'Now visible on the Growth Chart'),
           });
+          closeWorkspaceWithSavedChanges();
         }
       })
       .catch(() => {
         showSnackbar({
-          title: t('vitalsAndBiometricsSaveError', 'Error saving vitals and biometrics'),
+          title: t('BiometricsSaveError', 'Error saving growth data'),
           kind: 'error',
           isLowContrast: false,
-          subtitle: t('checkForValidity', 'Some of the values entered are invalid'),
+          subtitle: t('checkForValidity', 'Some values may be invalid'),
         });
       });
   };
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="p-4 bg-white rounded shadow-md">
-        <div className="mb-4">
-          <label className="block text-gray-700">Date</label>
-          <Controller
-            name="date"
-            control={methods.control}
-            render={({ field }) => <input {...field} className="w-full p-2 border rounded" type="date" required />}
-          />
-        </div>
+    <Form className={styles.form} data-openmrs-role="Growth Chart Form">
+      <div className={styles.grid}>
+        <Stack>
+          <Column>
+            <p className={styles.title}>{t('recordBiometrics', 'Record Biometrics')}</p>
+          </Column>
+          <Row className={styles.row}>
+            <Column>
+              <Controller
+                name="date"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <div className={styles.field}>
+                    <label className={styles.label}>{t('date', 'Date')}</label>
 
-        <div className="mb-4">
-          <label className="block text-gray-700">Height (cm)</label>
-          <Controller
-            name="height"
-            control={methods.control}
-            rules={{ required: true, min: 0 }}
-            render={({ field }) => (
-              <input
-                {...field}
-                className="w-full p-2 border rounded"
-                type="number"
-                step="0.1"
-                placeholder="Enter height"
-                required
+                    <OpenmrsDatePicker
+                      {...field}
+                      className={`${styles.input} ${fieldState.error ? styles.danger : ''}`}
+                      isRequired={true}
+                      value={field.value}
+                      onChange={(value) => {
+                        field.onChange(value);
+                      }}
+                    />
+                    {fieldState.error && <span className={styles.danger}>{fieldState.error.message}</span>}
+                  </div>
+                )}
               />
-            )}
-          />
-        </div>
+            </Column>
+          </Row>
+          <Row className={styles.row}>
+            <Column>
+              <BiometricsInput
+                control={control}
+                fieldProperties={[
+                  {
+                    name: t('length', 'Length'),
+                    type: 'number',
+                    min: LENGTH_THRESHOLDS.critically_low,
+                    max: LENGTH_THRESHOLDS.critically_high,
+                    id: 'length',
+                  },
+                ]}
+                interpretation={length && getInterpretation(length, LENGTH_THRESHOLDS)}
+                isValueWithinReferenceRange={
+                  length && length >= LENGTH_THRESHOLDS.critically_low && length <= LENGTH_THRESHOLDS.critically_high
+                }
+                showErrorMessage={showErrorNotification}
+                label={t('length', 'Length')}
+                unitSymbol="cm"
+              />
+            </Column>
+            <Column>
+              <BiometricsInput
+                control={control}
+                fieldProperties={[
+                  {
+                    name: t('weight', 'Weight'),
+                    type: 'number',
+                    min: WEIGHT_THRESHOLDS.critically_low,
+                    max: WEIGHT_THRESHOLDS.critically_high,
+                    id: 'weight',
+                  },
+                ]}
+                interpretation={weight && getInterpretation(weight, WEIGHT_THRESHOLDS)}
+                isValueWithinReferenceRange={
+                  weight && weight >= WEIGHT_THRESHOLDS.critically_low && weight <= WEIGHT_THRESHOLDS.critically_high
+                }
+                showErrorMessage={showErrorNotification}
+                label={t('weight', 'Weight')}
+                unitSymbol="kg"
+              />
+            </Column>
+            <Column>
+              <BiometricsInput
+                control={control}
+                fieldProperties={[
+                  {
+                    name: t('bmi', 'BMI'),
+                    type: 'number',
+                    id: 'computedBodyMassIndex',
+                  },
+                ]}
+                readOnly
+                label={t('calculatedBmi', 'BMI (calc.)')}
+                unitSymbol="kg/m²"
+              />
+            </Column>
+            <Column>
+              <BiometricsInput
+                control={control}
+                fieldProperties={[
+                  {
+                    name: t('muac', 'MUAC'),
+                    type: 'number',
+                    min: MUAC_THRESHOLDS.critically_low,
+                    max: MUAC_THRESHOLDS.critically_high,
+                    id: 'muac',
+                  },
+                ]}
+                interpretation={muac && getInterpretation(muac, MUAC_THRESHOLDS)}
+                isValueWithinReferenceRange={
+                  muac && muac >= MUAC_THRESHOLDS.critically_low && muac <= MUAC_THRESHOLDS.critically_high
+                }
+                showErrorMessage={showErrorNotification}
+                label={t('muac', 'MUAC')}
+                unitSymbol="cm"
+              />
+            </Column>
+          </Row>
+        </Stack>
+      </div>
 
-        <div className="">
-          <label className="">Weight (kg)</label>
-          <Controller
-            name="weight"
-            control={methods.control}
-            rules={{ required: true, min: 0 }}
-            render={({ field }) => (
-              <input {...field} className="" type="number" step="0.1" placeholder="Enter weight" required />
-            )}
+      {showErrorNotification && (
+        <Column className={styles.errorContainer}>
+          <InlineNotification
+            lowContrast
+            title={t('error', 'Error')}
+            subtitle={t('pleaseFillField', 'Please fill required fields') + '.'}
+            onClose={() => setShowErrorNotification(false)}
           />
-        </div>
-        <div>
-          <Controller
-            name="MUAC"
-            control={methods.control}
-            render={({ field }) => <input {...field} className="" type="number" step="0.1" placeholder="Enter MUAC" />}
-          />
-        </div>
+        </Column>
+      )}
 
-        <div>
-          <Button kind="secondary" type="button">
-            Cancel
-          </Button>
-          <Button kind="primary" type="submit">
-            Submit
-          </Button>
-        </div>
-      </form>
-    </FormProvider>
+      <ButtonSet className={isTablet ? styles.tablet : styles.desktop}>
+        <Button className={styles.button} kind="secondary" onClick={closeWorkspace}>
+          {t('discard', 'Discard')}
+        </Button>
+        <Button
+          className={styles.button}
+          kind="primary"
+          onClick={handleSubmit(saveGrowthData, onError)}
+          disabled={isSubmitting}
+          type="submit"
+        >
+          {t('saveAndClose', 'Save and close')}
+        </Button>
+      </ButtonSet>
+    </Form>
   );
 };
 

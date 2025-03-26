@@ -29,7 +29,7 @@
   "workspaces": [
     {
       "name": "growthchart-form-workspace",
-      "title": "GrowthchartForm",
+      "title": "Growth Chart Measurements",
       "component": "growthchartFormWorkspace"
     }
   ]
