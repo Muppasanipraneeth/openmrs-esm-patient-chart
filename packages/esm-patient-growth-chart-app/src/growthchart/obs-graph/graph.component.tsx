@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { LineChart } from '@carbon/charts-react';
 import '@carbon/charts/styles.css';
-import { Tab, Tabs, TabList } from '@carbon/react';
+import { Tab, Tabs, TabList, RadioButtonGroup, RadioButton } from '@carbon/react';
 import { useConfig } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
-
 import percentileData from '../utils/json/wtage.json';
+// import whoData from '../utils/json/wtage.json'; // WHO data (you need to provide this)
 import styles from './obs-graph.scss';
 import { useBiometrics } from '../resource-data';
 import classNames from 'classnames';
-import { t } from 'i18next';
 
 export interface GrowthChartOverviewProps {
   basePath: string;
@@ -27,7 +26,6 @@ enum ScaleTypes {
   LABELS = 'labels',
   LABELS_RATIO = 'labels-ratio',
 }
-
 enum LegendPositions {
   TOP = 'top',
   BOTTOM = 'bottom',
@@ -40,16 +38,21 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
   const { data } = useBiometrics(patientUuid);
   const config = useConfig();
   const { t } = useTranslation();
-
-  const [selectedConcept, setSelectedConcept] = React.useState<ConceptDescriptor>({
-    label: config.data[0]?.label,
-    uuid: config.data[0]?.concept,
+  const [selectedStandard, setSelectedStandard] = useState<'CDC' | 'WHO'>('WHO');
+  const [selectedConcept, setSelectedConcept] = useState<ConceptDescriptor>({
+    label: 'Weight',
+    uuid: config.concepts?.weightUuid || '',
   });
 
   const selectedGender = patient.gender === 'male' ? 'boys' : 'girls';
+  const conceptData = [
+    { concept: config.concepts?.weightUuid, label: 'Weight' },
+    { concept: config.concepts?.lengthUuid, label: 'Length' },
+    { concept: config.concepts?.bmiUuid, label: 'BMI' },
+  ].filter((item) => item.concept);
 
   useEffect(() => {
-    if (!patient.birthDate || !data.length) return;
+    if (!patient.birthDate || !data || !data.length) return;
 
     const dataSource = percentileData[selectedGender];
 
@@ -65,31 +68,32 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
       return Number(diffMonths.toFixed(2));
     };
 
+    const valueKey = selectedConcept.label.toLowerCase();
     const mappedPercentileData = [
-      ...dataSource.P3.map((d: { age: number; weight: number }) => ({
+      ...dataSource.P3.map((d: { age: number; weight: number; length?: number; bmi?: number }) => ({
         group: 'P3',
         key: d.age,
-        value: d.weight,
+        value: d[valueKey] || d.weight,
       })),
-      ...dataSource.P15.map((d: { age: number; weight: number }) => ({
+      ...dataSource.P15.map((d: { age: number; weight: number; length?: number; bmi?: number }) => ({
         group: 'P15',
         key: d.age,
-        value: d.weight,
+        value: d[valueKey] || d.weight,
       })),
-      ...dataSource.P50.map((d: { age: number; weight: number }) => ({
+      ...dataSource.P50.map((d: { age: number; weight: number; length?: number; bmi?: number }) => ({
         group: 'P50',
         key: d.age,
-        value: d.weight,
+        value: d[valueKey] || d.weight,
       })),
-      ...dataSource.P85.map((d: { age: number; weight: number }) => ({
+      ...dataSource.P85.map((d: { age: number; weight: number; length?: number; bmi?: number }) => ({
         group: 'P85',
         key: d.age,
-        value: d.weight,
+        value: d[valueKey] || d.weight,
       })),
-      ...dataSource.P97.map((d: { age: number; weight: number }) => ({
+      ...dataSource.P97.map((d: { age: number; weight: number; length?: number; bmi?: number }) => ({
         group: 'P97',
         key: d.age,
-        value: d.weight,
+        value: d[valueKey] || d.weight,
       })),
     ];
 
@@ -98,13 +102,13 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
       return {
         group: 'Patient',
         key: ageInMonths,
-        value: d.weight,
+        value: d[valueKey],
       };
     });
 
     const combinedData = [...mappedPercentileData, ...mappedPatientData];
     setChartData(combinedData);
-  }, [patientUuid, data, selectedGender, patient.birthDate]);
+  }, [patientUuid, data, selectedGender, patient.birthDate, selectedConcept, selectedStandard]);
 
   const chartColors = {
     P3: '#00a68f',
@@ -116,7 +120,7 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
   };
 
   const chartOptions = {
-    title: `Weight for Age (0 - 24 months) - ${selectedGender === 'boys' ? 'Boys' : 'Girls'}`,
+    title: `${selectedConcept.label} for Age 0 - 24 months - ${selectedGender === 'boys' ? 'Boys' : 'Girls'}`,
     axes: {
       bottom: {
         title: 'Age (Months)',
@@ -125,7 +129,7 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
         domain: [0, 24],
       },
       left: {
-        title: 'Weight (kg)',
+        title: `${selectedConcept.label} (${config.biometrics?.[`${selectedConcept.label.toLowerCase()}Unit`] || 'kg'})`,
         mapsTo: 'value',
         scaleType: ScaleTypes.LINEAR,
         includeZero: true,
@@ -140,12 +144,11 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
       customHTML: (data: any[]) => {
         const point = data[0];
         if (!point) return '<div>No data</div>';
-
         const group = point.group || 'Unknown';
         const value = point.value !== undefined ? point.value : 'N/A';
         const key = point.key !== undefined ? point.key : 'N/A';
-
-        return `<div>${group}: ${value} kg at ${key} months</div>`;
+        const unit = config.biometrics?.[`${selectedConcept.label.toLowerCase()}Unit`] || 'kg';
+        return `<div>${group}: ${value} ${unit} at ${key} months</div>`;
       },
     },
     curve: 'curveMonotoneX',
@@ -165,34 +168,48 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
         <label className={styles.conceptLabel} htmlFor="concept-tab-group">
           {t('displaying', 'Displaying')}
         </label>
+        <RadioButtonGroup
+          name="standard-group"
+          valueSelected={selectedStandard}
+          onChange={(value) => setSelectedStandard(value as 'CDC' | 'WHO')}
+          legendText={t('growthStandard', 'Growth Standard')}
+          orientation="horizontal"
+          className={styles.standardRadioGroup}
+        >
+          <RadioButton labelText={t('cdc', 'CDC')} value="CDC" />
+          <RadioButton labelText={t('who', 'WHO')} value="WHO" />
+        </RadioButtonGroup>
         <Tabs id="concept-tab-group" className={styles.verticalTabs} type="default">
           <TabList className={styles.tablist} aria-label="Obs tabs">
-            {config.data.map(({ concept, label }, index) => {
-              const tabClasses = classNames(styles.tab, styles.bodyLong01, {
-                [styles.selectedTab]: selectedConcept.label === label,
-              });
-
-              return (
-                <Tab
-                  key={concept}
-                  className={tabClasses}
-                  onClick={() =>
-                    setSelectedConcept({
-                      label,
-                      uuid: concept,
-                    })
-                  }
-                >
-                  {label}
-                </Tab>
-              );
-            })}
+            {conceptData.length > 0 &&
+              conceptData.map(({ concept, label }, index) => {
+                const tabClasses = classNames(styles.tab, styles.bodyLong01, {
+                  [styles.selectedTab]: selectedConcept.label === label,
+                });
+                return (
+                  <Tab
+                    key={concept}
+                    className={tabClasses}
+                    onClick={() =>
+                      setSelectedConcept({
+                        label,
+                        uuid: concept,
+                      })
+                    }
+                  >
+                    {label}
+                  </Tab>
+                );
+              })}
           </TabList>
         </Tabs>
       </div>
-
       <div className={styles.lineChartContainer}>
-        {chartData.length > 0 ? <LineChart data={chartData} options={chartOptions} /> : <p>Loading chart data...</p>}
+        {chartData.length > 0 ? (
+          <LineChart data={chartData} options={chartOptions} />
+        ) : (
+          <p>No data has been recorded for this patient</p>
+        )}
       </div>
     </div>
   );
