@@ -46,9 +46,9 @@ const GrowthChartOverview: React.FC<GrowthChartOverviewProps> = ({ patient, pati
 
   const selectedGender = patient.gender === 'male' ? 'boys' : 'girls';
   const conceptData = [
-    { concept: config.concepts?.weightUuid, label: 'Weight' },
-    { concept: config.concepts?.lengthUuid, label: 'Length' },
-    { concept: config.concepts?.bmiUuid, label: 'BMI' },
+    { concept: config.concepts?.weightUuid, label: 'Weight-age' },
+    { concept: config.concepts?.lengthUuid, label: 'Length-age' },
+    { concept: config.concepts?.bmiUuid, label: 'BMI-age' },
   ].filter((item) => item.concept);
 
   useEffect(() => {
