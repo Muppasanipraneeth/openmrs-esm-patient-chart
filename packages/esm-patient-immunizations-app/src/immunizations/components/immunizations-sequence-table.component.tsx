@@ -12,7 +12,7 @@ import {
   TableBody,
   TableCell,
 } from '@carbon/react';
-import { EditIcon, formatDate, getCoreTranslation, parseDate, TrashCanIcon, showToast } from '@openmrs/esm-framework';
+import { EditIcon, formatDate, getCoreTranslation, parseDate, TrashCanIcon, showModal, showSnackbar } from '@openmrs/esm-framework';
 import { type ImmunizationGrouped } from '../../types';
 import { immunizationFormSub } from '../utils';
 import styles from './immunizations-sequence-table.scss';
@@ -46,22 +46,37 @@ const SequenceTable: React.FC<SequenceTableProps> = ({
     try {
       await deletePatientImmunization(immunizationId, new AbortController());
 
-      showToast({
+      showSnackbar({
         title: t('immunizationDeleted', 'Immunization Deleted'),
         description: t('immunizationDeletedSuccess', 'The immunization dose has been successfully deleted'),
         kind: 'success',
-      });
+      } as any);
 
       onDoseDeleted?.();
+      dispose?.();
     } catch (error) {
-      showToast({
+      showSnackbar({
         title: t('error', 'Error'),
         description: t('immunizationDeleteError', 'Failed to delete immunization: ') + error.message,
         kind: 'error',
-      });
+      }as any);
     }
   };
-
+  let dispose: (() => void) | null = null;
+const ConfrimDelete=(immunizationId:string,vaccineUuid:string,doseNumber:number)=>{
+  
+   dispose=showModal("immunization-delete-modal",{
+    immunizationId,
+    doseNumber,
+    vaccineUuid,
+    handleDeleteDose: () => handleDeleteDose(immunizationId),
+    close: () => {
+      dispose?.();
+    },
+    
+  })
+  
+}
   const tableRows = existingDoses?.map((dose) => {
     return {
       id: dose?.immunizationObsUuid,
@@ -97,7 +112,7 @@ const SequenceTable: React.FC<SequenceTableProps> = ({
           kind="ghost"
           iconDescription={t('delete', 'Delete')}
           renderIcon={(props: ComponentProps<typeof TrashCanIcon>) => <TrashCanIcon size={16} {...props} />}
-          onClick={() => handleDeleteDose(dose.immunizationObsUuid)}
+          onClick={() => ConfrimDelete(dose.immunizationObsUuid,vaccineUuid, dose.doseNumber,)}
         >
           {t('delete', 'Delete')}
         </Button>
