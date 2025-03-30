@@ -41,6 +41,11 @@
       "order": 8
     }
   ],
+  "modals": [
+    {
+    "name": "immunization-delete-modal",
+    "component": "immunizationDeleteConfirmationDialog"
+  }],
   "pages": [],
   "workspaces": [
     {

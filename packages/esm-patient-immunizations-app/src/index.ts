@@ -25,6 +25,11 @@ export const immunizationScheduleDashboard = getSyncLifecycle(ImmunizationSchedu
 
 export const immunizationsDetailedSummary = getSyncLifecycle(immunizationsDetailedSummaryComponent, options);
 
+export const immunizationDeleteConfirmationDialog = getAsyncLifecycle(
+  () => import('./immunizations/delete-vaccine.modal'),
+  options,
+);
+
 export const immunizationsDashboardLink =
   // t('Immunizations', 'Immunizations')
   getSyncLifecycle(
