@@ -16,7 +16,6 @@
   "immunizationDeleted": "Immunization Deleted",
   "immunizationDeletedSuccess": "The immunization dose has been successfully deleted",
   "immunizationDeleteError": "Failed to delete immunization: ",
-  "immunizationHistory": "Immunization History",
   "immunizations": "Immunizations",
   "Immunizations": "Immunizations",
   "immunizations__lower": "immunizations",
