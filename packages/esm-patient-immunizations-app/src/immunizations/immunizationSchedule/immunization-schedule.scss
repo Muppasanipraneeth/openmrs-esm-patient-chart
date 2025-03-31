@@ -18,7 +18,7 @@
 .headerRow {
   position: sticky;
   top: 0;
-  background-color: $ui-background;
+  background-color: #f4f4f4;
   z-index: 2;
   border-bottom: 1px solid #ddd;
 }
@@ -30,9 +30,20 @@
   font-weight: bold;
   position: sticky;
   left: 0;
-  background: #ffffff;
+  background-color: #f4f4f4;
 }
-
+.expired {
+  background-color: #ffd7d9;
+  color: #a2191f;
+  padding: 0px 8px;
+  border-radius: 0.5rem;
+}
+.notexpired {
+  background-color: #a7f0ba;
+  padding: 0px 8px;
+  color: #044317;
+  border-radius: 0.5rem;
+}
 .vaccineName {
   width: 200px;
   position: sticky;
