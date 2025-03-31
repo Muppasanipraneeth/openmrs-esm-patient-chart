@@ -3,14 +3,15 @@ import { useImmunizations } from '../../hooks/useImmunizations';
 import { PatientChartPagination } from '@openmrs/esm-patient-common-lib';
 import { Table, TableHead, TableRow, TableHeader, TableBody, TableCell } from '@carbon/react';
 import { formatDate, parseDate } from '@openmrs/esm-framework';
+import styles from './immunization-schedule.scss';
 
 const vaccineNames = {
   'Bacillus Calmette–Guérin vaccine': 'BCG',
-  'Hemophilus influenza B vaccine': 'Hemophilus influenza B vaccine',
-  'Pentavalent pneumovax': 'Pentavalent pneumovax',
-  'Polio vaccine, inactivated': 'Polio vaccine, inactivated',
-  'Vitamin A': 'Vitamin A',
-  'Polio vaccination, oral': 'Polio vaccination, oral',
+  'Hemophilus influenza B vaccine': 'Hib',
+  'Pentavalent pneumovax': 'Penta',
+  'Polio vaccine, inactivated': 'IPV',
+  'Vitamin A': 'Vit A',
+  'Polio vaccination, oral': 'OPV',
   'Diphtheria tetanus and pertussis vaccination': 'TdAP',
   'Influenza vaccine': 'Flu',
   'Hepatitis B vaccine': 'Hep B',
@@ -34,13 +35,6 @@ const ImmunizationSchedule = ({ patientUuid }) => {
     ),
   }));
 
-  let maxDoses = 1;
-  sortedImmunizations.forEach((immunization) => {
-    if (immunization.existingDoses.length > maxDoses) {
-      maxDoses = immunization.existingDoses.length;
-    }
-  });
-
   const totalItems = sortedImmunizations.length;
   const totalPages = Math.ceil(totalItems / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
@@ -51,73 +45,75 @@ const ImmunizationSchedule = ({ patientUuid }) => {
     return formatDate(parseDate(date), { mode: 'standard', time: 'for today' });
   };
 
-  const rows = paginatedImmunizations.map((immunization) => {
-    const vaccineName = vaccineNames[immunization.vaccineName] || immunization.vaccineName;
-
-    const row = {
-      id: immunization.vaccineUuid,
-      vaccine: { vaccineName },
-      doses: Array.from({ length: maxDoses }).map((_, index) => {
-        const dose = immunization.existingDoses[index];
-        return (
-          <span key={index}>
-            {dose ? (
-              <>
-                {' # ' + dose.doseNumber}
-                <br />
-                {formatDates(dose.occurrenceDateTime)}
-              </>
-            ) : (
-              <> </>
-            )}
-          </span>
-        );
-      }),
-    };
-    return row;
-  });
-
   const headers = [
     { key: 'vaccine', header: 'Vaccine' },
     { key: 'doses', header: 'Doses' },
   ];
+
+  const rows = paginatedImmunizations.map((immunization) => {
+    const vaccineName = vaccineNames[immunization.vaccineName] || immunization.vaccineName;
+    const size = immunization.existingDoses.length;
+
+    const row = {
+      id: immunization.vaccineUuid,
+      vaccine: vaccineName,
+      expiration: immunization.existingDoses[size - 1]?.expirationDate || '-',
+      doses: immunization.existingDoses.map((dose, index) => (
+        <div key={index} className={styles.doseCell}>
+          {'#' + dose.doseNumber}
+          <br />
+          {formatDates(dose.occurrenceDateTime)}
+        </div>
+      )),
+    };
+    return row;
+  });
 
   const goTo = ({ page }) => {
     setCurrentPage(page);
   };
 
   return (
-    <div>
-      <Table size="xl" useZebraStyles={false} aria-label="Immunization Schedule">
-        <TableHead>
-          <TableRow style={{ backgroundColor: '#f4f4f4' }}>
-            {headers.map((header) => (
-              <TableHeader
-                key={header.key}
-                style={{
-                  minWidth: header.key === 'vaccine' ? '200px' : '80px',
-                  backgroundColor: '#f4f4f4',
-                }}
-                colSpan={header.key === 'doses' ? maxDoses : 1}
-              >
-                {header.header}
-              </TableHeader>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell style={{ backgroundColor: '#ffffff' }}>{row.vaccine.vaccineName}</TableCell>
-              {row.doses.map((dose, index) => (
-                <TableCell key={index} style={{ backgroundColor: '#ffffff' }}>
-                  {dose}
+    <div className={styles.widgetCard}>
+      <div className={styles.headerRow}>
+        {headers.map((header, index) => (
+          <div key={index} className={styles.headerCell}>
+            {header.header}
+          </div>
+        ))}
+      </div>
+
+      <div>
+        <Table size="xl" useZebraStyles={false} aria-label="Immunization Schedule">
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell
+                  className={styles.vaccineName}
+                  style={{
+                    backgroundColor: '#ffffff',
+                  }}
+                >
+                  <div style={{ width: '200px' }}>
+                    <strong>{row.vaccine}</strong>
+                    <br />
+                    {row.expiration && `Exp: ${row.expiration}`}
+                  </div>
                 </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                <TableCell
+                  style={{
+                    backgroundColor: '#ffffff',
+                    padding: 0,
+                    width: '100%',
+                  }}
+                >
+                  <div className={styles.vaccineDose}>{row.doses}</div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <PatientChartPagination
         totalItems={totalItems}

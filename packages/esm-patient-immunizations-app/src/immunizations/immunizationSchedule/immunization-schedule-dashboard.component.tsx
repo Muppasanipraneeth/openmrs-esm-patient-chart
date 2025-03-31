@@ -15,7 +15,7 @@ const ImmunizationScheduleDashboardTile: React.FC<ImmunizationScheduleDashboardP
   const { t } = useTranslation();
   const { data } = useImmunizations(patientUuid);
 
-  const headerTitle = t('immunizationHistory', 'Immunization History');
+  const headerTitle = t('immunization', 'Immunization');
   const displayText = t('noImmunizations', 'No immunizations have been recorded for this patient.');
 
   if (data?.length > 0) {
