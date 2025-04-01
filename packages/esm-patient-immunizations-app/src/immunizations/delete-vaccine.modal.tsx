@@ -4,6 +4,7 @@ import { useImmunizationsConceptSet } from '../hooks/useImmunizationsConceptSet'
 import { type ConfigObject } from '../config-schema';
 import { useConfig } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
+import styles from './delete-vaccine.modal.scss';
 
 interface DeleteConfirmModelProps {
   close: () => void;
@@ -28,7 +29,11 @@ const DeleteConfirmModel: React.FC<DeleteConfirmModelProps> = ({
 
   return (
     <>
-      <ModalHeader closeModal={close} title={t('immunizationDelete', 'Delete Immunization')} />
+      <ModalHeader
+        closeModal={close}
+        title={t('immunizationDelete', 'Delete Immunization')}
+        className={styles.modalHeader}
+      />
       <ModalBody>
         <p>
           {t(
