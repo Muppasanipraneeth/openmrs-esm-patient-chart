@@ -16,6 +16,7 @@
   "immunizationDeleted": "Immunization Deleted",
   "immunizationDeletedSuccess": "The immunization dose has been successfully deleted",
   "immunizationDeleteError": "Failed to delete immunization: ",
+  "immunizationHistory": "Immunization History",
   "immunizations": "Immunizations",
   "Immunizations": "Immunizations",
   "immunizations__lower": "immunizations",
@@ -24,6 +25,7 @@
   "lotNumber": "Lot Number",
   "manufacturer": "Manufacturer",
   "noImmunizations": "No immunizations have been recorded for this patient.",
+  "notes": "Notes",
   "pleaseSelect": "Please select",
   "PM": "PM",
   "recentVaccination": "Recent vaccination",
@@ -37,5 +39,8 @@
   "vaccinationDateRequired": "Vaccination date required",
   "vaccinationSaved": "Vaccination saved successfully",
   "vaccine": "Vaccine",
-  "vaccineRequired": "Vaccine required"
+  "vaccinebatchInformation": "Vaccine Batch Information",
+  "vaccineRequired": "Vaccine required",
+  "validlUntil": "Valid until",
+  "validUntil": "Valid Until"
 }
