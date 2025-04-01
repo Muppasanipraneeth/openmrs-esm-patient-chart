@@ -45,6 +45,16 @@ const ImmunizationSchedule = ({ patientUuid }) => {
     return formatDate(parseDate(date), { mode: 'standard', time: 'for today' });
   };
 
+  const expirationDate = (date) => {
+    if (!date) return null;
+    return formatDate(parseDate(date), { mode: 'standard' });
+  };
+
+  const isExpired = (date) => {
+    if (!date) return false;
+    return new Date(date) < new Date();
+  };
+
   const headers = [
     { key: 'vaccine', header: 'Vaccine' },
     { key: 'doses', header: 'Doses' },
@@ -53,11 +63,14 @@ const ImmunizationSchedule = ({ patientUuid }) => {
   const rows = paginatedImmunizations.map((immunization) => {
     const vaccineName = vaccineNames[immunization.vaccineName] || immunization.vaccineName;
     const size = immunization.existingDoses.length;
+    const lastDoseExpirationDate = immunization.existingDoses[size - 1]?.expirationDate;
+    const formattedExpiration = expirationDate(lastDoseExpirationDate);
 
     const row = {
       id: immunization.vaccineUuid,
       vaccine: vaccineName,
-      expiration: immunization.existingDoses[size - 1]?.expirationDate || '-',
+      expiration: formattedExpiration,
+      isExpired: isExpired(lastDoseExpirationDate),
       doses: immunization.existingDoses.map((dose, index) => (
         <div key={index} className={styles.doseCell}>
           {'#' + dose.doseNumber}
@@ -97,7 +110,11 @@ const ImmunizationSchedule = ({ patientUuid }) => {
                   <div style={{ width: '200px' }}>
                     <strong>{row.vaccine}</strong>
                     <br />
-                    {row.expiration && `Exp: ${row.expiration}`}
+                    {row.expiration && (
+                      <span className={row.isExpired ? styles.expired : styles.notexpired}>
+                        Expires: {row.expiration}
+                      </span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell
