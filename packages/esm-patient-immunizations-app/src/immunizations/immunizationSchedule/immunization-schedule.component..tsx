@@ -4,6 +4,7 @@ import { PatientChartPagination } from '@openmrs/esm-patient-common-lib';
 import { Table, TableHead, TableRow, TableHeader, TableBody, TableCell } from '@carbon/react';
 import { formatDate, parseDate } from '@openmrs/esm-framework';
 import styles from './immunization-schedule.scss';
+import { t } from 'i18next';
 
 const vaccineNames = {
   'Bacillus Calmette–Guérin vaccine': 'BCG',
@@ -112,7 +113,7 @@ const ImmunizationSchedule = ({ patientUuid }) => {
                     <br />
                     {row.expiration && (
                       <span className={row.isExpired ? styles.expired : styles.notexpired}>
-                        Expires: {row.expiration}
+                        Next Dose: {row.expiration}
                       </span>
                     )}
                   </div>
