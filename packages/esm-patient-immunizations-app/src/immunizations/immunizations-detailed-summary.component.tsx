@@ -85,12 +85,14 @@ const ImmunizationsDetailedSummary: React.FC<ImmunizationsDetailedSummaryProps> 
           isEmpty(immunization.sequences) && !isEmpty(immunization.existingDoses)
             ? `${t('lastDoseOn', 'Last Dose on')} ${new Date(
                 first<ExistingDoses>(immunization.existingDoses.sort(latestFirst))?.occurrenceDateTime,
-              ).toLocaleDateString(locale, { dateStyle: 'medium' })}`
+              ).toLocaleDateString(locale, { dateStyle: 'medium' })}, Dose ${
+                first<ExistingDoses>(immunization.existingDoses.sort(latestFirst))?.doseNumber
+              }`
             : !isEmpty(immunization.existingDoses)
-            ? `${first<Sequence>(immunization?.sequences)?.sequenceLabel} on ${new Date(
-                first<ExistingDoses>(immunization.existingDoses.sort(latestFirst))?.occurrenceDateTime,
-              ).toLocaleDateString(locale, { dateStyle: 'medium' })} `
-            : '';
+              ? `${first<Sequence>(immunization?.sequences)?.sequenceLabel} on ${new Date(
+                  first<ExistingDoses>(immunization.existingDoses.sort(latestFirst))?.occurrenceDateTime,
+                ).toLocaleDateString(locale, { dateStyle: 'medium' })} `
+              : '';
         return {
           id: immunization.vaccineUuid,
           vaccine: immunization.vaccineName,

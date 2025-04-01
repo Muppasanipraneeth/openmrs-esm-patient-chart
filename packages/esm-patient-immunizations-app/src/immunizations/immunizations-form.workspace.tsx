@@ -10,6 +10,7 @@ import {
   SelectItem,
   Stack,
   TextInput,
+  TextArea,
   TimePicker,
   TimePickerSelect,
 } from '@carbon/react';
@@ -73,6 +74,8 @@ const ImmunizationsForm: React.FC<DefaultPatientWorkspaceProps> = ({
         // The backend will attempt to convert the dose number to a positive integer
         // so we need to set it to null if the value is less than 1
         .transform((value) => (value < 1 ? null : value)),
+      validUntil: z.date().nullable(),
+      notes: z.string().optional(),
       expirationDate: z.date().nullable(),
       lotNumber: z.string().nullable(),
       manufacturer: z.string().nullable(),
@@ -88,12 +91,15 @@ const ImmunizationsForm: React.FC<DefaultPatientWorkspaceProps> = ({
       vaccinationDate: new Date(),
       vaccinationTime: dayjs(new Date()).format('hh:mm'),
       timeFormat: new Date().getHours() >= 12 ? 'PM' : 'AM',
+      validUntil: null,
+      notes: '',
       doseNumber: 0,
       expirationDate: null,
       lotNumber: '',
       manufacturer: '',
     },
   });
+  const isoFormat = 'YYYY-MM-DDTHH:mm:ss.SSSZZ';
 
   const {
     control,
@@ -108,6 +114,8 @@ const ImmunizationsForm: React.FC<DefaultPatientWorkspaceProps> = ({
   }, [isDirty, promptBeforeClosing]);
 
   const vaccineUuid = watch('vaccineUuid');
+  const vaccinationDate = watch('vaccinationDate');
+  const validUntil = watch('validUntil');
 
   useEffect(() => {
     const sub = immunizationFormSub.subscribe((props) => {
@@ -140,6 +148,7 @@ const ImmunizationsForm: React.FC<DefaultPatientWorkspaceProps> = ({
         vaccineUuid,
         vaccinationDate,
         doseNumber,
+        validUntil,
         expirationDate,
         lotNumber,
         manufacturer,
@@ -167,7 +176,7 @@ const ImmunizationsForm: React.FC<DefaultPatientWorkspaceProps> = ({
           ),
         ),
         doseNumber,
-        expirationDate,
+        expirationDate: validUntil ? toDateObjectStrict(toOmrsIsoString(validUntil)) : null,
         lotNumber,
         manufacturer,
       };
@@ -323,6 +332,46 @@ const ImmunizationsForm: React.FC<DefaultPatientWorkspaceProps> = ({
               </ResponsiveWrapper>
             </section>
           )}
+          <section>
+            <ResponsiveWrapper>
+              <Controller
+                name="validUntil"
+                control={control}
+                render={({ field }) => (
+                  <div className={styles.row}>
+                    <OpenmrsDatePicker
+                      {...field}
+                      id="vaccinationValidUntil"
+                      data-testid="vaccinationValidUntil"
+                      minDate={new Date(vaccinationDate)}
+                      style={{ paddingBottom: '1rem', width: '100%' }}
+                      labelText={t('validUntil', 'Valid Until')}
+                    />
+                  </div>
+                )}
+              />
+            </ResponsiveWrapper>
+          </section>
+          <section>
+            <ResponsiveWrapper>
+              <Controller
+                name="notes"
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <div className={styles.row}>
+                    <TextArea
+                      type="text"
+                      id="notes"
+                      labelText={t('notes', 'Notes')}
+                      value={value}
+                      onChange={(evt) => onChange(evt.target.value)}
+                    />
+                  </div>
+                )}
+              />
+            </ResponsiveWrapper>
+          </section>
+          <div className={styles.batchInfo}> {t('vaccinebatchInformation', 'Vaccine Batch Information')}</div>
           <section>
             <ResponsiveWrapper>
               <Controller

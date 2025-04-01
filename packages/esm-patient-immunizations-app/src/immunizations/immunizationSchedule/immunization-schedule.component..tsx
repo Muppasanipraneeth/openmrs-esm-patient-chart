@@ -73,7 +73,7 @@ const ImmunizationSchedule = ({ patientUuid }) => {
       isExpired: isExpired(lastDoseExpirationDate),
       doses: immunization.existingDoses.map((dose, index) => (
         <div key={index} className={styles.doseCell}>
-          {'#' + dose.doseNumber}
+          {'Dose ' + dose.doseNumber}
           <br />
           {formatDates(dose.occurrenceDateTime)}
         </div>

@@ -12,7 +12,15 @@ import {
   TableBody,
   TableCell,
 } from '@carbon/react';
-import { EditIcon, formatDate, getCoreTranslation, parseDate, TrashCanIcon, showModal, showSnackbar } from '@openmrs/esm-framework';
+import {
+  EditIcon,
+  formatDate,
+  getCoreTranslation,
+  parseDate,
+  TrashCanIcon,
+  showModal,
+  showSnackbar,
+} from '@openmrs/esm-framework';
 import { type ImmunizationGrouped } from '../../types';
 import { immunizationFormSub } from '../utils';
 import styles from './immunizations-sequence-table.scss';
@@ -35,9 +43,9 @@ const SequenceTable: React.FC<SequenceTableProps> = ({
     () => [
       { key: 'sequence', header: sequences.length ? t('sequence', 'Sequence') : t('doseNumber', 'Dose number') },
       { key: 'vaccinationDate', header: t('vaccinationDate', 'Vaccination date') },
-      { key: 'expirationDate', header: t('expirationDate', 'Expiration date') },
-      { key: 'edit', header: '' },
-      { key: 'delete', header: '' },
+      { key: 'expirationDate', header: t('validlUntil', 'Valid until') },
+      { key: 'edit', header: t('edit', 'Edit') },
+      { key: 'delete', header: t('delete', 'Delete') },
     ],
     [t, sequences.length],
   );
@@ -59,24 +67,21 @@ const SequenceTable: React.FC<SequenceTableProps> = ({
         title: t('error', 'Error'),
         description: t('immunizationDeleteError', 'Failed to delete immunization: ') + error.message,
         kind: 'error',
-      }as any);
+      } as any);
     }
   };
   let dispose: (() => void) | null = null;
-const ConfrimDelete=(immunizationId:string,vaccineUuid:string,doseNumber:number)=>{
-  
-   dispose=showModal("immunization-delete-modal",{
-    immunizationId,
-    doseNumber,
-    vaccineUuid,
-    handleDeleteDose: () => handleDeleteDose(immunizationId),
-    close: () => {
-      dispose?.();
-    },
-    
-  })
-  
-}
+  const ConfrimDelete = (immunizationId: string, vaccineUuid: string, doseNumber: number) => {
+    dispose = showModal('immunization-delete-modal', {
+      immunizationId,
+      doseNumber,
+      vaccineUuid,
+      handleDeleteDose: () => handleDeleteDose(immunizationId),
+      close: () => {
+        dispose?.();
+      },
+    });
+  };
   const tableRows = existingDoses?.map((dose) => {
     return {
       id: dose?.immunizationObsUuid,
@@ -84,7 +89,7 @@ const ConfrimDelete=(immunizationId:string,vaccineUuid:string,doseNumber:number)
         ? dose.doseNumber || 0
         : sequences?.find((s) => s.sequenceNumber === dose.doseNumber).sequenceLabel || dose.doseNumber,
       vaccinationDate: dose?.occurrenceDateTime && formatDate(new Date(dose.occurrenceDateTime)),
-      expirationDate: dose?.expirationDate && formatDate(new Date(dose.expirationDate), { noToday: true }),
+      expirationDate: (dose?.expirationDate && formatDate(new Date(dose.expirationDate), { noToday: true })) || '--',
       edit: (
         <Button
           kind="ghost"
@@ -112,7 +117,7 @@ const ConfrimDelete=(immunizationId:string,vaccineUuid:string,doseNumber:number)
           kind="ghost"
           iconDescription={t('delete', 'Delete')}
           renderIcon={(props: ComponentProps<typeof TrashCanIcon>) => <TrashCanIcon size={16} {...props} />}
-          onClick={() => ConfrimDelete(dose.immunizationObsUuid,vaccineUuid, dose.doseNumber,)}
+          onClick={() => ConfrimDelete(dose.immunizationObsUuid, vaccineUuid, dose.doseNumber)}
         >
           {t('delete', 'Delete')}
         </Button>
